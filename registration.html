@@ -8,7 +8,7 @@
 
 <style>
 /* ═══════════════════════════════════════════
-    DESIGN TOKENS & BASE
+   DESIGN TOKENS & BASE
 ═══════════════════════════════════════════ */
 :root {
   --navy:       #0b1929;
@@ -47,7 +47,7 @@ body::before {
 }
 
 /* ═══════════════════════════════════════════
-    HEADER & LAYOUT
+   HEADER & LAYOUT
 ═══════════════════════════════════════════ */
 header {
   position: sticky; top: 0; z-index: 200;
@@ -64,7 +64,7 @@ header {
 .page-title { font-family: "Outfit", sans-serif; font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 4px; }
 
 /* ═══════════════════════════════════════════
-    CARDS & FORM
+   CARDS & FORM
 ═══════════════════════════════════════════ */
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
 .card-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: var(--surface-2); }
@@ -91,7 +91,7 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
 }
 
 /* ═══════════════════════════════════════════
-    BUTTONS
+   BUTTONS
 ═══════════════════════════════════════════ */
 .btn { padding: 10px 16px; font-size: 13px; font-weight: 600; border: none; border-radius: var(--radius-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; white-space: nowrap; }
 .btn:active { transform: scale(0.96); }
@@ -113,7 +113,7 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
 .btn-submit.waiting { background: var(--amber); animation: pulse 1.5s infinite alternate; }
 
 /* ═══════════════════════════════════════════
-    ANIMAL CARDS & CHIPS
+   ANIMAL CARDS & CHIPS
 ═══════════════════════════════════════════ */
 .animal-card { background: var(--surface-2); border: 1px solid var(--border-2); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; animation: slideUp 0.3s ease both; }
 .animal-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
@@ -223,6 +223,8 @@ window.addAnimal = function () {
     animalCount++;
     const card = document.createElement("div");
     card.className = "animal-card";
+    
+    // [อัปเดต] เพิ่มช่อง input class="customSvc" ไว้ใต้ svc-grid
     card.innerHTML = `
         <div class="animal-card-header">
             <div class="animal-card-num">${animalCount}</div>
@@ -243,6 +245,10 @@ window.addAnimal = function () {
         </div>
         <div class="svc-label-row field-label">บริการที่ต้องการ</div>
         <div class="svc-grid"></div>
+        
+        <div class="field-group" style="margin-top: 10px;">
+            <input type="text" class="customSvc" placeholder="บริการอื่นๆ (ระบุเพิ่มเติม...)">
+        </div>
     `;
     
     const svcGrid = card.querySelector(".svc-grid");
@@ -257,10 +263,16 @@ window.addAnimal = function () {
                 <input type="checkbox" class="svc" value="${s}" ${i===0?'checked':''}>${s}
             </label>
         `).join("");
+        
+        // แก้ไข event handler ของ checkbox ไม่ให้ conflict กับการคลิก label
         svcGrid.querySelectorAll(".svc-chip").forEach(chip => {
             chip.onclick = (e) => {
+                // ป้องกัน event trigger ซ้ำซ้อนถ้าคลิกโดนตัว input โดยตรง
+                if (e.target.tagName !== 'INPUT') {
+                    const cb = chip.querySelector("input");
+                    cb.checked = !cb.checked;
+                }
                 const cb = chip.querySelector("input");
-                cb.checked = !cb.checked;
                 chip.classList.toggle("checked", cb.checked);
             };
         });
@@ -285,7 +297,16 @@ window.requestConsent = function() {
     const animals = [];
     document.querySelectorAll(".animal-card").forEach(c => {
         const svcs = [];
+        
+        // ดึงจาก Checkbox (Chip)
         c.querySelectorAll(".svc:checked").forEach(s => svcs.push(s.value));
+        
+        // [อัปเดต] ดึงข้อความจาก Textbox บริการอื่นๆ (ถ้ามีข้อมูล)
+        const customService = c.querySelector(".customSvc").value.trim();
+        if (customService) {
+            svcs.push(customService);
+        }
+
         animals.push({
             name: c.querySelector(".animalName").value,
             species: c.querySelector(".species").value === "ม" ? "แมว" : "สุนัข",
