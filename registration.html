@@ -81,6 +81,16 @@ input, select, textarea {
 }
 input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow); }
 
+/* สไตล์สำหรับช่องบริการอื่นๆ โดยเฉพาะเพื่อป้องกันการแสดงผลผิดพลาด */
+.custom-svc-container { margin-top: 12px; }
+.customSvc {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px dashed var(--border-2) !important;
+}
+.customSvc:focus {
+  border-style: solid !important;
+}
+
 /* Grid Layouts */
 .owner-row { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 12px; align-items: end; margin-bottom: 12px; }
 .owner-row-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; }
@@ -224,7 +234,7 @@ window.addAnimal = function () {
     const card = document.createElement("div");
     card.className = "animal-card";
     
-    // [อัปเดต] เพิ่มช่อง input class="customSvc" ไว้ใต้ svc-grid
+    // โครงสร้าง HTML ของการ์ดสัตว์
     card.innerHTML = `
         <div class="animal-card-header">
             <div class="animal-card-num">${animalCount}</div>
@@ -246,7 +256,7 @@ window.addAnimal = function () {
         <div class="svc-label-row field-label">บริการที่ต้องการ</div>
         <div class="svc-grid"></div>
         
-        <div class="field-group" style="margin-top: 10px;">
+        <div class="field-group custom-svc-container">
             <input type="text" class="customSvc" placeholder="บริการอื่นๆ (ระบุเพิ่มเติม...)">
         </div>
     `;
@@ -264,10 +274,9 @@ window.addAnimal = function () {
             </label>
         `).join("");
         
-        // แก้ไข event handler ของ checkbox ไม่ให้ conflict กับการคลิก label
+        // จัดการเหตุการณ์คลิก Chip
         svcGrid.querySelectorAll(".svc-chip").forEach(chip => {
             chip.onclick = (e) => {
-                // ป้องกัน event trigger ซ้ำซ้อนถ้าคลิกโดนตัว input โดยตรง
                 if (e.target.tagName !== 'INPUT') {
                     const cb = chip.querySelector("input");
                     cb.checked = !cb.checked;
@@ -301,7 +310,7 @@ window.requestConsent = function() {
         // ดึงจาก Checkbox (Chip)
         c.querySelectorAll(".svc:checked").forEach(s => svcs.push(s.value));
         
-        // [อัปเดต] ดึงข้อความจาก Textbox บริการอื่นๆ (ถ้ามีข้อมูล)
+        // ดึงข้อความจาก Textbox บริการอื่นๆ (ถ้ามีข้อมูล)
         const customService = c.querySelector(".customSvc").value.trim();
         if (customService) {
             svcs.push(customService);
